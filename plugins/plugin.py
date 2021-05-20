@@ -8,5 +8,5 @@ class Plugin(object):
     
 
     @abc.abstractmethod
-    def post_add_hook(self, old_metadata: dict, new_metadata: dict):
+    def post_add_hook(self, metadata_list: list):
         return
