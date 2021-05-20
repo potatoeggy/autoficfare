@@ -5,6 +5,7 @@ import tempfile
 import os
 from contextlib import redirect_stdout
 import io
+import sys
 import configparser
 
 try:
@@ -19,6 +20,7 @@ FF_ARGS = [
     "--non-interactive"
 ]
 RETRY_FILE = "retry.txt"
+PLUGIN_DIR = "plugins"
 
 # read configuration
 config = configparser.ConfigParser()
@@ -46,8 +48,11 @@ except KeyError:
 
 # log handler
 class Log:
+    def __init__(self, suppress_output: bool):
+        self.suppress_output = suppress_output
+    
     def _log(self, msg, priority="DEBUG"):
-        if suppress_output:
+        if self.suppress_output:
             return
         print(f"{priority}: {msg}")
 
@@ -65,7 +70,21 @@ class Log:
         self._log(msg, "ERROR")
 
 
-log = Log()
+log = Log(suppress_output)
+
+# load plugins
+log.debug("Loading plugins")
+plugins = {}
+sys.path.insert(0, PLUGIN_DIR)
+for f in os.listdir(PLUGIN_DIR):
+    fname, ext = os.path.splitext(f)
+    if ext == ".py":
+        module = __import__(fname)
+        plugins[fname] = module.Plugin(config)
+        log.debug(f"Loaded plugin {module}")
+sys.path.pop(0)
+log.info(f"Loaded {len(plugins)} plugins.")
+
 def download_story(epub_path, retry_url):
     output = io.StringIO()
     # catch fanficfare's output and read to check if update was successful
@@ -115,6 +134,7 @@ except Exception:
 
 log.info(f"Found {len(story_urls)} stories to update.")
 successful_updates = 0
+metadata_list = []
 for i, s in enumerate(story_urls):
     log.info(f"Searching for {s} in Calibre database ({i+1}/{len(story_urls)})")
     calibre_id = int(next(iter(db.search(f"Identifiers:url:{s}")), -1))
@@ -141,6 +161,11 @@ for i, s in enumerate(story_urls):
     new_metadata = db.get_metadata(calibre_id).all_non_none_fields()
     log.info(f"Update for story {new_metadata['title']} - {', '.join(new_metadata['authors'])} successful.")
     successful_updates += 1
-    # TODO: add hook system for extensions that are passed `old_metadata` and `new_metadata`
+    metadata_list.append((old_metadata, new_metadata))
+    
+# post-process hook
+for name, plugin in plugins.items():
+    log.info(f"Running post-library hook for plugin {name}...")
+    plugin.post_add_hook(metadata_list)
 
 log.info(f"Finished. {successful_updates}/{len(story_urls)} story updates successful.")
