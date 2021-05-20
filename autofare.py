@@ -113,15 +113,17 @@ for i, s in enumerate(story_urls):
 
     try:
         log.debug("Story found in database. Exporting book...")
-        db.copy_format_to(calibre_id, "epub", os.path.join(tempdir, "temp.epub"))  # yikes hardcoded
+        epub_path = db.format(calibre_id, "epub", as_path=True)
+        if epub_path is None:
+            raise Exception("File copy failed.")
     except Exception:  # hopefully NoSuchFormat
         log.warn("Failed to export book. Skipping...")
         continue
 
     log.info("Export successful. Updating story, this may take a while...")
-    if not download_story(os.path.join(tempdir, "temp.epub")):
+    if not download_story(epub_path):
         continue
 
     log.debug("Adding updated story to Calibre...")
-    db.add_format(calibre_id, "epub", os.path.join(tempdir, "temp.epub"), )
+    db.add_format(calibre_id, "epub", epub_path)
     log.info("Update for story {s} successful.")
