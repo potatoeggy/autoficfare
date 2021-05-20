@@ -18,7 +18,6 @@ FF_ARGS = [
     "--update-epub",
     "--non-interactive"
 ]
-
 RETRY_FILE = "retry.txt"
 
 # read configuration
@@ -46,6 +45,7 @@ except KeyError:
     exit(1)
 
 
+# log handler
 class Log:
     def _log(self, msg, priority="DEBUG"):
         if suppress_output:
@@ -68,9 +68,9 @@ class Log:
 
 log = Log()
 
-
 def download_story(epub_path, retry_url):
     output = io.StringIO()
+    # catch fanficfare's output and read to check if update was successful
     with redirect_stdout(output):
         cli.main(argv=FF_ARGS + [epub_path])
     output = output.getvalue()
@@ -96,12 +96,14 @@ def clean_story_link(link):
     log.warn(f"{link} is not a parsable or valid story link, this may cause issues.")
     return link
 
+# import retry links
 story_urls = []
 if os.path.isfile(RETRY_FILE):
     with open(RETRY_FILE) as file:
         story_urls += file.read().splitlines()
     os.remove(RETRY_FILE)
 
+# perform work in temporary directory
 tempdir = tempfile.gettempdir()
 os.chdir(tempdir)
 log.debug(f"Using temporary directory: {tempdir}")
