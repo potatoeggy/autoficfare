@@ -22,10 +22,11 @@ FF_ARGS = [
     "--non-interactive"
     ]
 CALIBRE_PATH = "/media/Stories"
-story_urls = [
-    "https://www.fanfiction.net/s/13423523/1/",
-    "https://www.fanfiction.net/s/13446456/6/"
-    ]
+IMAP_EMAIL = ""
+IMAP_PASSWORD = ""
+IMAP_FOLDER = "FF"
+IMAP_SERVER = "imap.gmail.com"
+IMAP_MARK_READ = True
 
 class Log:
     def _log(self, msg, priority="DEBUG"):
@@ -66,6 +67,16 @@ def download_story(epub_path):
         return True
     return False
 
+log.info("Searching email for updated stories...")
+story_urls = []
+try:
+    story_urls = geturls.get_urls_from_imap(IMAP_SERVER, IMAP_EMAIL, IMAP_PASSWORD, IMAP_FOLDER, IMAP_MARK_READ)
+except Exception:
+    log.error("There was an error searching email. Please check your config.")
+
+if len(story_urls) == 0:
+    log.info("No story updates found.")
+
 for i, s in enumerate(story_urls):
     log.info(f"Searching for {s} in Calibre database ({i+1}/{len(story_urls)})")
     calibre_id = int(next(iter(db.search(f"Identifiers:url:{s}")), -1))
@@ -88,6 +99,3 @@ for i, s in enumerate(story_urls):
     log.info("Adding updated story to Calibre...")
     db.add_format(calibre_id, "epub", os.path.join(tempdir, "temp.epub"))
     log.info("Update for story {s} complete.")
-
-
-# fanficfare.geturls.get_urls_from_imap()
