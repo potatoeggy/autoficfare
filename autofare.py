@@ -111,19 +111,22 @@ for i, s in enumerate(story_urls):
         log.warn("Story not found in database. Skipping...")
         continue
 
+    old_metadata = db.get_metadata(calibre_id).all_non_none_fields()
     try:
-        log.debug("Story found in database. Exporting book...")
+        log.debug(f"{old_metadata['title']} - {', '.join(old_metadata['authors'])} found in database. Exporting book...")
         epub_path = db.format(calibre_id, "epub", as_path=True)
         if epub_path is None:
             raise Exception("File copy failed.")
     except Exception:  # hopefully NoSuchFormat
-        log.warn("Failed to export book. Skipping...")
+        log.warn("Failed to export story. Skipping...")
         continue
 
-    log.info("Export successful. Updating story, this may take a while...")
+    log.info(f"Successfully found and exported {old_metadata['title']} - {', '.join(old_metadata['authors'])}. Updating story, this may take a while...")
     if not download_story(epub_path):
         continue
 
     log.debug("Adding updated story to Calibre...")
     db.add_format(calibre_id, "epub", epub_path)
-    log.info("Update for story {s} successful.")
+    new_metadata = db.get_metadata(calibre_id).all_non_none_fields()
+    log.info(f"Update for story {new_metadata['title']} - {', '.join(new_metadata['authors'])} successful.")
+    # TODO: add hook system for extensions that are passed `old_metadata` and `new_metadata`
