@@ -162,10 +162,11 @@ for i, s in enumerate(story_urls):
     log.info(f"Update for story {new_metadata['title']} - {', '.join(new_metadata['authors'])} successful.")
     successful_updates += 1
     metadata_list.append((old_metadata, new_metadata))
-    
-# post-process hook
-for name, plugin in plugins.items():
-    log.info(f"Running post-library hook for plugin {name}...")
-    plugin.post_add_hook(metadata_list)
+
+if successful_updates > 0:
+    # post-process hook
+    for name, plugin in plugins.items():
+        log.info(f"Running post-library hook for plugin {name}...")
+        plugin.post_add_hook(metadata_list)
 
 log.info(f"Finished. {successful_updates}/{len(story_urls)} story updates successful.")
