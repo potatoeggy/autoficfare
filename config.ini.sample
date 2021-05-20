@@ -1,10 +1,11 @@
 [Configuration]
 Verbose=True
 LibraryPath=/path/to/Calibre/Library
+AddStoriesNotInCalibre=False
 
 [IMAP]
 Server=imap.gmail.com
 Email=username@gmail.com
-Password=imappasswordhere
+Password=imap_password_here
 Folder=Fanfiction
 MarkUpdatesAsRead=True

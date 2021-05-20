@@ -26,6 +26,7 @@ try:
     conf = config["Configuration"]
     verbose = conf.getboolean("Verbose", fallback=False)
     calibre_path = conf.get("LibraryPath")
+    add_new_stories = conf.get("AddStoriesNotInCalibre", fallback=True)
 except KeyError:
     print("ERROR: Invalid general configuration.")
 
@@ -102,7 +103,7 @@ except Exception:
     log.error("There was an error searching email. Please check your config.")
 
 log.info(f"Found {len(story_urls)} stories to update.")
-
+successful_updates = 0
 for i, s in enumerate(story_urls):
     log.info(f"Searching for {s} in Calibre database ({i+1}/{len(story_urls)})")
     calibre_id = int(next(iter(db.search(f"Identifiers:url:{s}")), -1))
@@ -128,4 +129,7 @@ for i, s in enumerate(story_urls):
     db.add_format(calibre_id, "epub", epub_path)
     new_metadata = db.get_metadata(calibre_id).all_non_none_fields()
     log.info(f"Update for story {new_metadata['title']} - {', '.join(new_metadata['authors'])} successful.")
+    successful_updates += 1
     # TODO: add hook system for extensions that are passed `old_metadata` and `new_metadata`
+
+log.info(f"Finished. {successful_updates}/{len(story_urls)} story updates successful.")
