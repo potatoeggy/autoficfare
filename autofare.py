@@ -28,21 +28,21 @@ story_urls = [
     ]
 
 class Log:
-    def log(self, msg, priority="DEBUG"):
+    def _log(self, msg, priority="DEBUG"):
         print(f"{priority}: {msg}")
 
     def debug(self, msg):
         if VERBOSE:
-            self.log(msg, "DEBUG")
+            self._log(msg, "DEBUG")
     
     def info(self, msg):
-        self.log(msg, "INFO")
+        self._log(msg, "INFO")
     
     def warn(self, msg):
-        self.log(msg, "WARN")
+        self._log(msg, "WARN")
     
     def error(self, msg):
-        self.log(msg, "ERROR")
+        self._log(msg, "ERROR")
     
 log = Log()
 tempdir = tempfile.gettempdir()
@@ -56,7 +56,7 @@ def download_story(epub_path):
         cli.main(argv=FF_ARGS + [epub_path])
     output = output.getvalue()
     if "chapters, more than source:" in output:
-        log.error("More chapters found in local version.")
+        log.warn("More chapters found in local version.")
     elif "already contains" in output:
         log.info("No new chapters — update may not yet have processed through site. Queuing for retry on next run.")
         # TODO: actually queue
@@ -77,7 +77,7 @@ for i, s in enumerate(story_urls):
         log.info("Story found in database. Exporting book...")
         db.copy_format_to(calibre_id, "epub", os.path.join(tempdir, "temp.epub")) # yikes hardcoded
     except Exception: # hopefully NoSuchFormat
-        log.error("Failed to export book. Skipping...")
+        log.warn("Failed to export book. Skipping...")
         continue
 
     log.info("Export successful. Checking story for updates, this may take a while...")
