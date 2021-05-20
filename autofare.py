@@ -28,7 +28,7 @@ try:
     verbose = conf.getboolean("Verbose", fallback=False)
     calibre_path = conf.get("LibraryPath")
     add_new_stories = conf.get("AddStoriesNotInCalibre", fallback=True)
-    suppress_output = conf.get("Quiet", fallback=False)
+    suppress_output = conf.getboolean("Quiet", fallback=False)
 except KeyError:
     print("ERROR: Invalid general configuration.")
     exit(1)
@@ -43,7 +43,6 @@ try:
 except KeyError:
     print("ERROR: Invalid IMAP configuration.")
     exit(1)
-
 
 # log handler
 class Log:
@@ -67,7 +66,6 @@ class Log:
 
 
 log = Log()
-
 def download_story(epub_path, retry_url):
     output = io.StringIO()
     # catch fanficfare's output and read to check if update was successful
