@@ -1,0 +1,9 @@
+[Configuration]
+Verbose=True
+LibraryPath=/path/to/Calibre/Library
+
+[IMAP]
+Server=imap.gmail.com
+Email=username@gmail.com
+Password=imappasswordhere
+MarkUpdatesAsRead=True
