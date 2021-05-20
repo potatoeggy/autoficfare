@@ -7,6 +7,8 @@ import sys
 import os
 from contextlib import redirect_stdout
 import io
+import argparse
+import configparser
 
 try:
     import init_calibre
@@ -15,25 +17,41 @@ except ImportError:
 
 from calibre.library import db
 
-VERBOSE = True
 FF_ARGS = [
     "--update-epub",
     "--progressbar",
     "--non-interactive"
     ]
-CALIBRE_PATH = "/media/Stories"
-IMAP_EMAIL = ""
-IMAP_PASSWORD = ""
-IMAP_FOLDER = "FF"
-IMAP_SERVER = "imap.gmail.com"
-IMAP_MARK_READ = True
+
+arg_parser = argparse.ArgumentParser(description="Check if any stories have updated through IMAP and FanFicFare and add any found to Calibre")
+# TODO: add later
+
+# read configuration
+config = configparser.ConfigParser()
+config.read("config.ini")
+try:
+    conf = config["Configuration"]
+    verbose = conf.getboolean("Verbose", fallback=False)
+    calibre_path = conf.get("LibraryPath")
+except KeyError:
+    print("ERROR: Invalid general configuration.")
+
+try:
+    imap = config["IMAP"]
+    imap_server = imap.get("Server", fallback="imap.gmail.com")
+    imap_email = imap.get("Email")
+    imap_password = imap.get("Password")
+    imap_folder = imap.get("Folder")
+    imap_mark_read = imap.getboolean("MarkUpdatesAsRead", fallback=True)
+except KeyError:
+    print("ERROR: Invalid IMAP configuration.")
 
 class Log:
     def _log(self, msg, priority="DEBUG"):
         print(f"{priority}: {msg}")
 
     def debug(self, msg):
-        if VERBOSE:
+        if verbose:
             self._log(msg, "DEBUG")
     
     def info(self, msg):
@@ -46,10 +64,6 @@ class Log:
         self._log(msg, "ERROR")
     
 log = Log()
-tempdir = tempfile.gettempdir()
-os.chdir(tempdir)
-log.debug(f"Using temporary directory: {tempdir}")
-db = db(CALIBRE_PATH).new_api
 
 def download_story(epub_path):
     output = io.StringIO()
@@ -67,10 +81,15 @@ def download_story(epub_path):
         return True
     return False
 
+tempdir = tempfile.gettempdir()
+os.chdir(tempdir)
+log.debug(f"Using temporary directory: {tempdir}")
+db = db(calibre_path).new_api
+
 log.info("Searching email for updated stories...")
 story_urls = []
 try:
-    story_urls = geturls.get_urls_from_imap(IMAP_SERVER, IMAP_EMAIL, IMAP_PASSWORD, IMAP_FOLDER, IMAP_MARK_READ)
+    story_urls = geturls.get_urls_from_imap(imap_server, imap_email, imap_password, imap_folder, imap_mark_read)
 except Exception:
     log.error("There was an error searching email. Please check your config.")
 
