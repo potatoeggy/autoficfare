@@ -2,6 +2,7 @@
 Verbose=True
 LibraryPath=/path/to/Calibre/Library
 AddStoriesNotInCalibre=False
+Quiet=False
 
 [IMAP]
 Server=imap.gmail.com

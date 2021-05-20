@@ -27,6 +27,7 @@ try:
     verbose = conf.getboolean("Verbose", fallback=False)
     calibre_path = conf.get("LibraryPath")
     add_new_stories = conf.get("AddStoriesNotInCalibre", fallback=True)
+    suppress_output = conf.get("Quiet", fallback=False)
 except KeyError:
     print("ERROR: Invalid general configuration.")
 
@@ -43,6 +44,8 @@ except KeyError:
 
 class Log:
     def _log(self, msg, priority="DEBUG"):
+        if suppress_output:
+            return
         print(f"{priority}: {msg}")
 
     def debug(self, msg):
