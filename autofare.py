@@ -12,7 +12,7 @@ import configparser
 try:
     import init_calibre
 except ImportError:
-    pass # if running via calibre-debug or not Linux
+    pass  # if running via calibre-debug or not Linux
 
 from calibre.library import db
 
@@ -20,7 +20,7 @@ FF_ARGS = [
     "--update-epub",
     "--progressbar",
     "--non-interactive"
-    ]
+]
 
 # read configuration
 config = configparser.ConfigParser()
@@ -42,6 +42,7 @@ try:
 except KeyError:
     print("ERROR: Invalid IMAP configuration.")
 
+
 class Log:
     def _log(self, msg, priority="DEBUG"):
         print(f"{priority}: {msg}")
@@ -49,17 +50,19 @@ class Log:
     def debug(self, msg):
         if verbose:
             self._log(msg, "DEBUG")
-    
+
     def info(self, msg):
         self._log(msg, "INFO")
-    
+
     def warn(self, msg):
         self._log(msg, "WARN")
-    
+
     def error(self, msg):
         self._log(msg, "ERROR")
-    
+
+
 log = Log()
+
 
 def download_story(epub_path):
     output = io.StringIO()
@@ -69,13 +72,15 @@ def download_story(epub_path):
     if "chapters, more than source:" in output:
         log.warn("More chapters found in local version.")
     elif "already contains" in output:
-        log.info("No new chapters found - update may not yet have processed through site. Queuing for retry on next run.")
+        log.info(
+            "No new chapters found - update may not yet have processed through site. Queuing for retry on next run.")
         # TODO: actually queue
     elif "No story url found in epub to update" in output:
         log.warn("No URL in EPUB to update from.")
     else:
         return True
     return False
+
 
 tempdir = tempfile.gettempdir()
 os.chdir(tempdir)
@@ -85,7 +90,8 @@ db = db(calibre_path).new_api
 log.info("Searching email for updated stories...")
 story_urls = []
 try:
-    story_urls = geturls.get_urls_from_imap(imap_server, imap_email, imap_password, imap_folder, imap_mark_read)
+    story_urls = geturls.get_urls_from_imap(
+        imap_server, imap_email, imap_password, imap_folder, imap_mark_read)
 except Exception:
     log.error("There was an error searching email. Please check your config.")
 
@@ -101,8 +107,8 @@ for i, s in enumerate(story_urls):
 
     try:
         log.info("Story found in database. Exporting book...")
-        db.copy_format_to(calibre_id, "epub", os.path.join(tempdir, "temp.epub")) # yikes hardcoded
-    except Exception: # hopefully NoSuchFormat
+        db.copy_format_to(calibre_id, "epub", os.path.join(tempdir, "temp.epub"))  # yikes hardcoded
+    except Exception:  # hopefully NoSuchFormat
         log.warn("Failed to export book. Skipping...")
         continue
 
@@ -110,7 +116,7 @@ for i, s in enumerate(story_urls):
     if not download_story(os.path.join(tempdir, "temp.epub")):
         log.info("Failed to update story or no updates found. Skipping...")
         continue
-    
+
     log.info("Adding updated story to Calibre...")
     db.add_format(calibre_id, "epub", os.path.join(tempdir, "temp.epub"), )
     log.info("Update for story {s} complete.")
