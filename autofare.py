@@ -16,7 +16,6 @@ from calibre.library import db
 
 FF_ARGS = [
     "--update-epub",
-    "--progressbar",
     "--non-interactive"
 ]
 
