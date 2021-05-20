@@ -4,7 +4,7 @@ LibraryPath=/path/to/Calibre/Library
 AddNewStories=False
 Quiet=False
 
-[IMAP]
+[imap]
 Server=imap.gmail.com
 Email=username@gmail.com
 Password=imap_password_here

@@ -36,7 +36,7 @@ except KeyError:
     exit(1)
 
 try:
-    imap = config["IMAP"]
+    imap = config["imap"]
     imap_server = imap.get("Server", fallback="imap.gmail.com")
     imap_email = imap.get("Email")
     imap_password = imap.get("Password")
