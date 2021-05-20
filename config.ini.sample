@@ -1,7 +1,7 @@
 [Configuration]
 Verbose=True
 LibraryPath=/path/to/Calibre/Library
-AddStoriesNotInCalibre=False
+AddNewStories=False
 Quiet=False
 
 [IMAP]
