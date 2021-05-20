@@ -58,7 +58,7 @@ def download_story(epub_path):
     if "chapters, more than source:" in output:
         log.warn("More chapters found in local version.")
     elif "already contains" in output:
-        log.info("No new chapters — update may not yet have processed through site. Queuing for retry on next run.")
+        log.info("No new chapters found - update may not yet have processed through site. Queuing for retry on next run.")
         # TODO: actually queue
     elif "No story url found in epub to update" in output:
         log.warn("No URL in EPUB to update from.")
