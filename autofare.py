@@ -80,6 +80,15 @@ def download_story(epub_path):
     return False
 
 
+def clean_story_link(link):
+    # works for FFNet and AO3
+    strings = link.split("/")
+    for i, s in enumerate(strings):
+        if s.isnumeric():
+            return "/".join(strings[:i+1])
+    log.warn(f"{link} is not a parsable or valid story link, this may cause issues.")
+    return link
+
 tempdir = tempfile.gettempdir()
 os.chdir(tempdir)
 log.debug(f"Using temporary directory: {tempdir}")
@@ -88,13 +97,12 @@ db = db(calibre_path).new_api
 log.info("Searching email for updated stories...")
 story_urls = []
 try:
-    story_urls = geturls.get_urls_from_imap(
-        imap_server, imap_email, imap_password, imap_folder, imap_mark_read)
+    story_urls = list(map(clean_story_link, geturls.get_urls_from_imap(
+        imap_server, imap_email, imap_password, imap_folder, imap_mark_read)))
 except Exception:
     log.error("There was an error searching email. Please check your config.")
 
-if len(story_urls) == 0:
-    log.info("No story updates found.")
+log.info(f"Found {len(story_urls)} stories to update.")
 
 for i, s in enumerate(story_urls):
     log.info(f"Searching for {s} in Calibre database ({i+1}/{len(story_urls)})")
@@ -104,17 +112,16 @@ for i, s in enumerate(story_urls):
         continue
 
     try:
-        log.info("Story found in database. Exporting book...")
+        log.debug("Story found in database. Exporting book...")
         db.copy_format_to(calibre_id, "epub", os.path.join(tempdir, "temp.epub"))  # yikes hardcoded
     except Exception:  # hopefully NoSuchFormat
         log.warn("Failed to export book. Skipping...")
         continue
 
-    log.info("Export successful. Checking story for updates, this may take a while...")
+    log.info("Export successful. Updating story, this may take a while...")
     if not download_story(os.path.join(tempdir, "temp.epub")):
-        log.info("Failed to update story or no updates found. Skipping...")
         continue
 
-    log.info("Adding updated story to Calibre...")
+    log.debug("Adding updated story to Calibre...")
     db.add_format(calibre_id, "epub", os.path.join(tempdir, "temp.epub"), )
-    log.info("Update for story {s} complete.")
+    log.info("Update for story {s} successful.")
