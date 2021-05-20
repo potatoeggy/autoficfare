@@ -26,7 +26,7 @@ PLUGIN_DIR = "plugins"
 config = configparser.ConfigParser()
 config.read("config.ini")
 try:
-    conf = config["Configuration"]
+    conf = config["autoficfare"]
     verbose = conf.getboolean("Verbose", fallback=False)
     calibre_path = conf.get("LibraryPath")
     add_new_stories = conf.getboolean("AddNewStories", fallback=False)

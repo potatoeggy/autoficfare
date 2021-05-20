@@ -1,4 +1,4 @@
-[Configuration]
+[autoficfare]
 Verbose=True
 LibraryPath=/path/to/Calibre/Library
 AddNewStories=False
