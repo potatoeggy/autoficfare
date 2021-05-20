@@ -6,4 +6,5 @@ LibraryPath=/path/to/Calibre/Library
 Server=imap.gmail.com
 Email=username@gmail.com
 Password=imappasswordhere
+Folder=Fanfiction
 MarkUpdatesAsRead=True
