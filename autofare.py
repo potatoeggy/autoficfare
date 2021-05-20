@@ -27,7 +27,7 @@ try:
     conf = config["Configuration"]
     verbose = conf.getboolean("Verbose", fallback=False)
     calibre_path = conf.get("LibraryPath")
-    add_new_stories = conf.get("AddStoriesNotInCalibre", fallback=True)
+    add_new_stories = conf.getboolean("AddStoriesNotInCalibre", fallback=True)
     suppress_output = conf.getboolean("Quiet", fallback=False)
 except KeyError:
     print("ERROR: Invalid general configuration.")
