@@ -30,6 +30,7 @@ try:
     suppress_output = conf.get("Quiet", fallback=False)
 except KeyError:
     print("ERROR: Invalid general configuration.")
+    exit(1)
 
 try:
     imap = config["IMAP"]
@@ -40,6 +41,7 @@ try:
     imap_mark_read = imap.getboolean("MarkUpdatesAsRead", fallback=True)
 except KeyError:
     print("ERROR: Invalid IMAP configuration.")
+    exit(1)
 
 
 class Log:
