@@ -1,4 +1,4 @@
-# autofare
+# autoficfare
 
 A Python script to check if any fanfiction has updated from email alerts using [FanFicFare](https://github.com/JimmXinu/FanFicFare) and updates them in [Calibre](https://github.com/kovidgoyal/calibre).
 
@@ -13,13 +13,13 @@ A Python script to check if any fanfiction has updated from email alerts using [
 If Calibre was installed from source, the script can be run directly.
 
 ```
-$ python3 autofare.py
+$ python3 autoficfare.py
 ```
 
 Otherwise, the script should be run in Calibre's debug environment.
 
 ```
-$ calibre-debug autofare.py
+$ calibre-debug autoficfare.py
 ```
 
 ## Configuration
