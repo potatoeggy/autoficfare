@@ -103,7 +103,6 @@ if os.path.isfile(RETRY_FILE):
 
 # perform work in temporary directory
 tempdir = tempfile.gettempdir()
-os.chdir(tempdir)
 log.debug(f"Using temporary directory: {tempdir}")
 db = db(calibre_path).new_api
 
