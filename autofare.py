@@ -9,10 +9,10 @@ import configparser
 
 try:
     import init_calibre
+    from calibre.library import db
 except ImportError:
-    pass  # if running via calibre-debug or not Linux
-
-from calibre.library import db
+    print("ERROR: No Calibre import available. Ensure that this script is being run with calibre-debug or that the init_calibre module is accessible.")
+    exit()
 
 FF_ARGS = [
     "--update-epub",
