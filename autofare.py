@@ -1,9 +1,7 @@
 #!/usr/bin/python
 from fanficfare import geturls
 from fanficfare import cli
-import json
 import tempfile
-import sys
 import os
 from contextlib import redirect_stdout
 import io
