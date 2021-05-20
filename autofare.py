@@ -7,7 +7,6 @@ import sys
 import os
 from contextlib import redirect_stdout
 import io
-import argparse
 import configparser
 
 try:
@@ -22,9 +21,6 @@ FF_ARGS = [
     "--progressbar",
     "--non-interactive"
     ]
-
-arg_parser = argparse.ArgumentParser(description="Check if any stories have updated through IMAP and FanFicFare and add any found to Calibre")
-# TODO: add later
 
 # read configuration
 config = configparser.ConfigParser()
@@ -116,5 +112,5 @@ for i, s in enumerate(story_urls):
         continue
     
     log.info("Adding updated story to Calibre...")
-    db.add_format(calibre_id, "epub", os.path.join(tempdir, "temp.epub"))
+    db.add_format(calibre_id, "epub", os.path.join(tempdir, "temp.epub"), )
     log.info("Update for story {s} complete.")
