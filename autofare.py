@@ -19,6 +19,8 @@ FF_ARGS = [
     "--non-interactive"
 ]
 
+RETRY_FILE = "retry.txt"
+
 # read configuration
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -67,7 +69,7 @@ class Log:
 log = Log()
 
 
-def download_story(epub_path):
+def download_story(epub_path, retry_url):
     output = io.StringIO()
     with redirect_stdout(output):
         cli.main(argv=FF_ARGS + [epub_path])
@@ -75,9 +77,9 @@ def download_story(epub_path):
     if "chapters, more than source:" in output:
         log.warn("More chapters found in local version.")
     elif "already contains" in output:
-        log.info(
-            "No new chapters found - update may not yet have processed through site. Queuing for retry on next run.")
-        # TODO: actually queue
+        log.info("No new chapters found - update may not yet have processed through site. Queuing for retry on next run.")
+        with open(RETRY_FILE, "a") as file:
+            file.write(retry_url + "\n")
     elif "No story url found in epub to update" in output:
         log.warn("No URL in EPUB to update from.")
     else:
@@ -94,15 +96,20 @@ def clean_story_link(link):
     log.warn(f"{link} is not a parsable or valid story link, this may cause issues.")
     return link
 
+story_urls = []
+if os.path.isfile(RETRY_FILE):
+    with open(RETRY_FILE) as file:
+        story_urls += file.read().splitlines()
+    os.remove(RETRY_FILE)
+
 tempdir = tempfile.gettempdir()
 os.chdir(tempdir)
 log.debug(f"Using temporary directory: {tempdir}")
 db = db(calibre_path).new_api
 
 log.info("Searching email for updated stories...")
-story_urls = []
 try:
-    story_urls = list(map(clean_story_link, geturls.get_urls_from_imap(
+    story_urls += list(map(clean_story_link, geturls.get_urls_from_imap(
         imap_server, imap_email, imap_password, imap_folder, imap_mark_read)))
 except Exception:
     log.error("There was an error searching email. Please check your config.")
@@ -127,7 +134,7 @@ for i, s in enumerate(story_urls):
         continue
 
     log.info(f"Successfully found and exported {old_metadata['title']} - {', '.join(old_metadata['authors'])}. Updating story, this may take a while...")
-    if not download_story(epub_path):
+    if not download_story(epub_path, s):
         continue
 
     log.debug("Adding updated story to Calibre...")
