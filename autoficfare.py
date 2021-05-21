@@ -83,7 +83,7 @@ for f in os.listdir(PLUGIN_DIR):
         plugins[fname] = module.Plugin(config)
         log.debug(f"Loaded plugin {module}")
 sys.path.pop(0)
-log.info(f"Loaded {len(plugins)} plugins.")
+log.info(f"Loaded {len(plugins)} plugin(s).")
 
 def download_story(epub_path, retry_url):
     output = io.StringIO()
