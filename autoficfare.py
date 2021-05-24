@@ -80,7 +80,12 @@ for f in os.listdir(PLUGIN_DIR):
     fname, ext = os.path.splitext(f)
     if ext == ".py":
         module = __import__(fname)
-        plugins[fname] = module.Plugin(config)
+        try:
+            plugins[fname] = module.Plugin(config)
+            if not "post_add_hook" in dir(plugins[fname]):
+                raise AttributeError
+        except AttributeError:
+            log.warn(f"{fname} is in the plugins directory but does not have a proper plugin structure.")
         log.debug(f"Loaded plugin {module}")
 sys.path.pop(0)
 log.info(f"Loaded {len(plugins)} plugin(s).")
