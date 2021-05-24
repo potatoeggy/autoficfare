@@ -6,4 +6,6 @@ class Plugin(object):
     
 
     def post_add_hook(self, metadata_list: list):
-        return
+        for story in metadata_list:
+            print(f"Old metadata: {story[0]}")
+            print(f"New metadata: {story[1]}")
