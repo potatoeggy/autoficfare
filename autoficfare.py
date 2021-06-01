@@ -104,6 +104,10 @@ def download_story(epub_path, retry_url):
             file.write(retry_url + "\n")
     elif "No story url found in epub to update" in output:
         log.warn("No URL in EPUB to update from.")
+    elif "version 2 challenge" in output:
+        log.info("Encountered an unsolvable Cloudflare challenge. Queuing for retry on next run.")
+        with open(RETRY_FILE, "a") as file:
+            file.write(retry_url + "\n")
     else:
         return True
     return False
@@ -118,17 +122,18 @@ def clean_story_link(link):
     log.warn(f"{link} is not a parsable or valid story link, this may cause issues.")
     return link
 
-# import retry links
-story_urls = []
-if os.path.isfile(RETRY_FILE):
-    with open(RETRY_FILE) as file:
-        story_urls += file.read().splitlines()
-    os.remove(RETRY_FILE)
-
 # perform work in temporary directory
 tempdir = tempfile.gettempdir()
 log.debug(f"Using temporary directory: {tempdir}")
 db = db(calibre_path).new_api
+
+# import retry links
+story_urls = []
+if os.path.isfile(RETRY_FILE):
+    log.info("Searching for previously failed updates...")
+    with open(RETRY_FILE) as file:
+        story_urls += file.read().splitlines()
+    os.remove(RETRY_FILE)
 
 log.info("Searching email for updated stories...")
 try:
