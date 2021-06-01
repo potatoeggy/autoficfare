@@ -104,7 +104,7 @@ def download_story(epub_path, retry_url):
             file.write(retry_url + "\n")
     elif "No story url found in epub to update" in output:
         log.warn("No URL in EPUB to update from.")
-    elif "version 2 challenge" in output:
+    elif "version 2" in output:
         log.info("Encountered an unsolvable Cloudflare challenge. Queuing for retry on next run.")
         with open(RETRY_FILE, "a") as file:
             file.write(retry_url + "\n")
