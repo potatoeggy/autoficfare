@@ -7,6 +7,7 @@ from contextlib import redirect_stdout
 import io
 import sys
 import configparser
+import traceback
 
 try:
     import init_calibre
@@ -94,7 +95,13 @@ def download_story(epub_path, retry_url):
     output = io.StringIO()
     # catch fanficfare's output and read to check if update was successful
     with redirect_stdout(output):
-        cli.main(argv=FF_ARGS + [epub_path])
+        try:
+            cli.main(argv=FF_ARGS + [epub_path])
+        except Exception:
+            log.error("FanFicFare crash, queuing for retry on next run, traceback listed below:")
+            log.error(traceback.format_exc())
+            with open(RETRY_FILE, "a") as file:
+                file.write(retry_url + "\n")
     output = output.getvalue()
     if "chapters, more than source:" in output:
         log.warn("More chapters found in local version.")
@@ -104,10 +111,6 @@ def download_story(epub_path, retry_url):
             file.write(retry_url + "\n")
     elif "No story url found in epub to update" in output:
         log.warn("No URL in EPUB to update from.")
-    elif "version 2" in output:
-        log.info("Encountered an unsolvable Cloudflare challenge. Queuing for retry on next run.")
-        with open(RETRY_FILE, "a") as file:
-            file.write(retry_url + "\n")
     else:
         return True
     return False
