@@ -1,6 +1,7 @@
 # ignore configs
 config.ini
 plugins/*.py
+retry.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
